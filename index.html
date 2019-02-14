@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babushka</title>
+    <style>
+        body {
+            background-color: coral
+        }
+
+        #liste {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 100vw;
+            margin: 0 auto;
+        }
+
+        img {
+            width: 200px;
+            margin: 5px;
+        }
+
+        p {
+            margin: 5px;
+
+        }
+
+        h2 {
+            margin: 5px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .menu {
+
+            text-align: center;
+            padding: 10px 10px;
+        }
+
+        #popup {
+
+
+            background-color: aquamarine;
+            width: 100vw;
+            height: 90vw;
+            position: fixed;
+            display: none;
+
+        }
+
+        #indhold {
+            width: 70%;
+            height: 100%;
+            text-align: center;
+            background: red;
+            position: absolute;
+            left: 15%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="popup">
+        <div id="indhold"></div>
+        <button id="luk">X</button>
+    </div>
+    <h1>Menu</h1>
+
+    <nav class="menu">
+        <button class="filter valgt" data-hold="alle">Menu</button>
+        <button class="filter" data-hold="forretter">Forret</button>
+        <button class="filter" data-hold="hovedretter">Hovedret</button>
+        <button class="filter" data-hold="desserter">Dessert</button>
+        <button class="filter" data-hold="drikkevarer">Drikkevarer</button>
+        <button class="filter" data-hold="sideorders">Sideorders</button>
+    </nav>
+
+    <div id="liste"></div>
+
+    <script>
+        let retter = [];
+        let dest = document.querySelector("#liste");
+        let filter = "alle";
+
+
+        document.addEventListener("DOMContentLoaded", sidenVises);
+
+        function sidenVises() {
+
+            async function getJson() {
+                console.log("JSON hentes");
+                let jsonData = await fetch("retter.json");
+                retter = await jsonData.json();
+                retter.sort((a, b) => {
+                    return b.kategori.localeCompare(a.kategori);
+                })
+
+                visRetter();
+            }
+
+            function visRetter() {
+                dest.innerHTML = "";
+                retter.forEach(ret => {
+                    if (filter == "alle" || filter == ret.kategori) {
+                        let template = `
+                    <div class="visteRetter">
+              <h2>${ret.navn}</h2>
+
+                            <p>Beskrivelse kort: ${ret.kort}</p>
+                            <p>Beskrivelse lang: ${ret.lang}</p>
+                            <p>Oprindelse: ${ret.oprindelse}</p>
+                            <div> <img src="imgs/large/${ret.billede}.jpg"> </div>
+                            <p>Pris: ${ret.pris}</p>
+                    </div>`;
+
+                        dest.insertAdjacentHTML("beforeend", template);
+                        dest.lastElementChild.addEventListener("click", open);
+
+                        function open() {
+                            document.querySelector("#indhold").innerHTML = `<h2>${ret.navn}</h2>
+
+                            <p>Beskrivelse kort: ${ret.kort}</p>
+                            <p>Beskrivelse lang: ${ret.lang}</p>
+                            <p>Oprindelse: ${ret.oprindelse}</p>
+                            <div> <img src="imgs/large/${ret.billede}.jpg"> </div>
+                            <p>Pris: ${ret.pris}</p>`;
+
+                            document.querySelector("#popup").style.display = "block";
+                        }
+                    };
+                })
+            }
+
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.addEventListener("click", filtrering);
+            })
+
+            document.querySelector("#luk").addEventListener("click", () => {
+                document.querySelector("#popup").style.display = "none";
+            })
+
+            function filtrering() {
+                filter = this.getAttribute("data-hold");
+                document.querySelector("h1").textContent = this.textContent;
+
+                document.querySelectorAll(".filter").forEach(elm => {
+                    elm.classList.remove("valgt");
+                })
+                this.classList.add("valgt");
+
+                visRetter();
+            }
+
+
+            getJson();
+            console.log("json");
+
+
+        }
+
+    </script>
+</body>
+
+</html>

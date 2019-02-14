@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babushka</title>
+    <style>
+        #liste {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 100vw;
+            margin: 0 auto;
+        }
+
+        body {
+            background: red;
+        }
+
+        img {
+            width: 200px;
+            margin: 5px;
+        }
+
+        p {
+            margin: 5px;
+        }
+
+        h2 {
+            margin: 5px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .menu {
+
+            text-align: center;
+            padding: 10px 10px;
+        }
+
+        #popup {
+            background-color: aquamarine;
+            width: 100vw;
+            height: 90vw;
+            position: fixed;
+
+
+        }
+
+        #indhold {
+            width: 70%;
+            height: 100%;
+            text-align: center;
+            background: red;
+            position: absolute;
+            left: 15%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="popup">
+        <div id="indhold"></div>
+        <button id="luk">X</button>
+    </div>
+
+    <script>
+        let dish;
+        let urlParams = new URLSearchParams(window.location.search);
+        let id = urlParams.get("id");
+        document.addEventListener("DOMContentLoaded", sidenVises);
+
+        function sidenVises() {
+            let retter = [];
+            let dest = document.querySelector("#liste");
+            let filter = "alle";
+
+            async function getJson() {
+                console.log("JSON hentes");
+                let jsonData = await fetch("retter.json");
+                retter = await jsonData.json();
+                retter.forEach(obj => {
+                    if (obj.id == id) {
+                        dish = obj;
+                    }
+                })
+
+
+                open();
+            }
+
+            function open() {
+                document.querySelector("#indhold").innerHTML = `
+                        <div>
+                            <h2>${dish.navn}</h2>
+                            <p>Beskrivelse kort: ${dish.kort}</p>
+                            <p>Beskrivelse lang: ${dish.lang}</p>
+                            <p>Oprindelse: ${dish.oprindelse}</p>
+                            <div> <img src="imgs/large/${dish.billede}.jpg"> </div>
+                            <p>Pris: ${dish.pris}</p>
+                        </div>
+`;
+            }
+            getJson();
+            console.log("json");
+
+        }
+    </script>
+</body>
+
+</html>
+
